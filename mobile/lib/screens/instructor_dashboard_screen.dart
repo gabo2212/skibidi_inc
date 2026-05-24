@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_controller.dart';
+import '../theme/newsprint_theme.dart';
 import '../widgets/info_banner.dart';
+import '../widgets/newsprint_ticker.dart';
 import '../widgets/section_card.dart';
 import 'ai_generate_task_screen.dart';
 import 'create_task_screen.dart';
@@ -45,13 +47,15 @@ class InstructorDashboardScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         children: <Widget>[
           Text(
-            'Welcome back, ${controller.currentUser?.displayName ?? 'Instructor'}',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            'Instructor Ledger',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+          Text(
+            'Filed for ${controller.currentUser?.displayName ?? 'Instructor'}',
+            style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(height: 12),
           if (controller.isPreviewMode)
@@ -59,6 +63,15 @@ class InstructorDashboardScreen extends StatelessWidget {
               message:
                   'The app is showing a local preview because AWS outputs are not filled in yet. Once Terraform is deployed, rerun the export script and the same UI will call Cognito and API Gateway.',
             ),
+          const SizedBox(height: 18),
+          NewsprintTicker(
+            items: <String>[
+              '${tasks.length} total briefs',
+              '$assignedCount assigned',
+              '$inProgressCount in progress',
+              '${controller.generatedDrafts.length} AI drafts',
+            ],
+          ),
           const SizedBox(height: 18),
           Row(
             children: <Widget>[
@@ -124,23 +137,32 @@ class InstructorDashboardScreen extends StatelessWidget {
               ],
             ),
           ),
-          SectionCard(
-            title: 'Project status',
-            subtitle:
-                'This summary is tuned for demo screenshots and teacher walkthroughs.',
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: NewsprintColors.ink,
+              border: Border.fromBorderSide(
+                BorderSide(color: NewsprintColors.ink),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Total tasks: ${tasks.length}'),
-                const SizedBox(height: 8),
                 Text(
-                  'Bedrock drafts ready: ${controller.generatedDrafts.length}',
+                  'PROJECT STATUS',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: NewsprintColors.background,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   controller.isPreviewMode
                       ? 'Authentication mode: local preview'
                       : 'Authentication mode: Cognito user pool',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: NewsprintColors.background,
+                  ),
                 ),
               ],
             ),
@@ -179,13 +201,13 @@ class _InstructorNotificationsButton extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
+                color: NewsprintColors.accent,
+                borderRadius: BorderRadius.zero,
               ),
               child: Text(
                 unread > 9 ? '9+' : '$unread',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: NewsprintColors.background,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),

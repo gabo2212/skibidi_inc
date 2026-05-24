@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/newsprint_theme.dart';
+
 class InfoBanner extends StatelessWidget {
   const InfoBanner({
     super.key,
@@ -16,15 +18,15 @@ class InfoBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: backgroundColor ?? const Color(0xFFDCFCE7),
-        borderRadius: BorderRadius.circular(16),
+        color: backgroundColor ?? NewsprintColors.muted,
+        border: Border.all(color: NewsprintColors.ink),
       ),
       child: Text(
         message,
-        style: TextStyle(
-          color: foregroundColor ?? const Color(0xFF14532D),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: foregroundColor ?? NewsprintColors.ink,
           fontWeight: FontWeight.w600,
         ),
       ),

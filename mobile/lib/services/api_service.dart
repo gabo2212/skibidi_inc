@@ -356,7 +356,9 @@ class ApiService {
     }),
   ];
 
-  Future<List<AppNotification>> fetchNotifications({String? accessToken}) async {
+  Future<List<AppNotification>> fetchNotifications({
+    String? accessToken,
+  }) async {
     if (isPreviewMode) {
       return List<AppNotification>.from(_previewNotifications);
     }
@@ -377,8 +379,9 @@ class ApiService {
     String? accessToken,
   }) async {
     if (isPreviewMode) {
-      final index = _previewNotifications
-          .indexWhere((item) => item.notificationId == notificationId);
+      final index = _previewNotifications.indexWhere(
+        (item) => item.notificationId == notificationId,
+      );
       if (index >= 0) {
         final updated = _previewNotifications[index].copyWith(read: true);
         _previewNotifications[index] = updated;

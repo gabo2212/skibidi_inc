@@ -44,8 +44,7 @@ class AppConfig {
       if (raw.trim().isEmpty) {
         return _placeholderConfig();
       }
-      final Map<String, dynamic> json =
-          jsonDecode(raw) as Map<String, dynamic>;
+      final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
       return _fromJson(json);
     } catch (_) {
       return _placeholderConfig();
@@ -59,7 +58,7 @@ class AppConfig {
         (json['custom'] as Map<String, dynamic>?) ?? <String, dynamic>{};
     final Map<String, dynamic> policy =
         (auth['password_policy'] as Map<String, dynamic>?) ??
-            _defaultPasswordPolicy;
+        _defaultPasswordPolicy;
 
     return AppConfig(
       awsRegion: auth['aws_region']?.toString() ?? '',
@@ -107,8 +106,7 @@ class AppConfig {
                 'usernameAttributes': <String>['email'],
                 'signupAttributes': <String>['email'],
                 'passwordProtectionSettings': <String, dynamic>{
-                  'passwordPolicyMinLength':
-                      passwordPolicy['min_length'] ?? 8,
+                  'passwordPolicyMinLength': passwordPolicy['min_length'] ?? 8,
                   'passwordPolicyCharacters': _passwordPolicyCharacters(),
                 },
                 'mfaConfiguration': 'OFF',

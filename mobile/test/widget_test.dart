@@ -12,6 +12,14 @@ void main() {
       userPoolId: '',
       userPoolClientId: '',
       apiBaseUrl: '',
+      s3BucketName: '',
+      passwordPolicy: <String, dynamic>{
+        'min_length': 8,
+        'require_lowercase': true,
+        'require_uppercase': true,
+        'require_numbers': true,
+        'require_symbols': true,
+      },
     );
     final controller = AppController(
       config: config,
@@ -22,7 +30,7 @@ void main() {
     await tester.pumpWidget(InternTaskApp(controller: controller));
     await tester.pumpAndSettle();
 
-    expect(find.text('InternTask AI Cloud'), findsOneWidget);
-    expect(find.text('Sign in'), findsAtLeastNWidgets(1));
+    expect(find.text('InternTask\nAI Cloud'), findsOneWidget);
+    expect(find.text('SIGN IN'), findsOneWidget);
   });
 }

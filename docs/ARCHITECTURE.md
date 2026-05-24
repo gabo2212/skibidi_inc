@@ -4,6 +4,8 @@
 
 InternTask AI Cloud is a serverless AWS application with a Flutter mobile client and Terraform-managed backend infrastructure.
 
+For a service-by-service explanation of what Terraform deploys and how DynamoDB is used, see [AWS_TERRAFORM_AND_DATABASE.md](AWS_TERRAFORM_AND_DATABASE.md).
+
 Core services:
 
 - Amazon Cognito User Pool and groups

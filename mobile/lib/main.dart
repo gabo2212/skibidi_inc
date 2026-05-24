@@ -6,6 +6,8 @@ import 'screens/role_home_screen.dart';
 import 'services/api_service.dart';
 import 'services/app_controller.dart';
 import 'services/auth_service.dart';
+import 'theme/newsprint_theme.dart';
+import 'widgets/newsprint_background.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -91,33 +93,9 @@ class InternTaskApp extends StatelessWidget {
         return MaterialApp(
           title: 'InternTask AI Cloud',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF0F766E),
-              brightness: Brightness.light,
-            ),
-            scaffoldBackgroundColor: const Color(0xFFF6F9F7),
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFFF6F9F7),
-              foregroundColor: Color(0xFF0F172A),
-              elevation: 0,
-            ),
-            cardTheme: CardThemeData(
-              color: Colors.white,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
+          theme: NewsprintTheme.build(),
+          builder: (context, child) =>
+              NewsprintBackground(child: child ?? const SizedBox.shrink()),
           home: controller.isSignedIn
               ? RoleHomeScreen(controller: controller)
               : LoginScreen(controller: controller),

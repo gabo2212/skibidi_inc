@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_controller.dart';
+import '../theme/newsprint_theme.dart';
+import '../widgets/newsprint_ticker.dart';
 import '../widgets/section_card.dart';
 import 'intern_task_list_screen.dart';
 import 'notifications_screen.dart';
@@ -37,13 +39,20 @@ class InternDashboardScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         children: <Widget>[
+          Text('Intern Desk', style: Theme.of(context).textTheme.headlineLarge),
           Text(
-            'Hello, ${controller.currentUser?.displayName ?? 'Intern'}',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            'Filed for ${controller.currentUser?.displayName ?? 'Intern'}',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          const SizedBox(height: 18),
+          NewsprintTicker(
+            items: <String>[
+              '${tasks.length} assigned',
+              '$doneCount validated',
+              '${controller.unreadNotificationCount} unread notices',
+            ],
           ),
           const SizedBox(height: 18),
           Row(
@@ -66,12 +75,13 @@ class InternDashboardScreen extends StatelessWidget {
             ],
           ),
           SectionCard(
-            title: 'Your next steps',
+            title: 'Current assignment column',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text(
                   'Open your assigned tasks, update status, and upload proof files from the same workflow.',
+                  textAlign: TextAlign.justify,
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -123,13 +133,13 @@ class _NotificationsButton extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
+                color: NewsprintColors.accent,
+                borderRadius: BorderRadius.zero,
               ),
               child: Text(
                 unread > 9 ? '9+' : '$unread',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: NewsprintColors.background,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),

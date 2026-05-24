@@ -65,6 +65,7 @@ flutter test
 ## Documentation Index
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system overview and diagram
+- [docs/AWS_TERRAFORM_AND_DATABASE.md](docs/AWS_TERRAFORM_AND_DATABASE.md) — plain-English AWS, Terraform, and database guide
 - [docs/API_DESIGN.md](docs/API_DESIGN.md) — REST contract
 - [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — DynamoDB tables and access patterns
 - [docs/INSTALLATION.md](docs/INSTALLATION.md) — deployment steps

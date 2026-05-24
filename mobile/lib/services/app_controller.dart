@@ -214,9 +214,12 @@ class AppController extends ChangeNotifier {
       accessToken: await authService.getAccessToken(),
     );
     notifications = notifications
-        .map((notification) => notification.notificationId == updated.notificationId
-            ? updated
-            : notification)
+        .map(
+          (notification) =>
+              notification.notificationId == updated.notificationId
+              ? updated
+              : notification,
+        )
         .toList(growable: false);
     notifyListeners();
     return updated;
