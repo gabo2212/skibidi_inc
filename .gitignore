@@ -20,6 +20,11 @@ aws-config.json
 .aws/
 credentials
 config
+# Allow project-owned `config` directories (mobile assets and Dart source)
+!mobile/lib/config/
+!mobile/lib/config/**
+!mobile/assets/config/
+!mobile/assets/config/**
 
 # Terraform
 .terraform/

@@ -8,7 +8,11 @@ ACCESS_TOKEN="${ACCESS_TOKEN:-}"
 COMMAND="${1:-list}"
 
 if [[ -z "$API_BASE_URL" ]]; then
-  API_BASE_URL="$(cd "$TERRAFORM_DIR" && terraform output -raw api_base_url)"
+  if (cd "$TERRAFORM_DIR" && terraform output -raw api_gateway_url) >/dev/null 2>&1; then
+    API_BASE_URL="$(cd "$TERRAFORM_DIR" && terraform output -raw api_gateway_url)"
+  else
+    API_BASE_URL="$(cd "$TERRAFORM_DIR" && terraform output -raw api_base_url)"
+  fi
 fi
 
 if [[ -z "$ACCESS_TOKEN" ]]; then

@@ -18,10 +18,18 @@ Authorization: Bearer <access_token>
 | `POST` | `/tasks` | `admin`, `instructor` | Create a task |
 | `GET` | `/tasks` | all | List tasks visible to the caller |
 | `GET` | `/tasks/{id}` | all | Get one visible task |
+| `PUT` | `/tasks/{id}` | `admin`, `instructor` on managed tasks | Update task fields (title, description, deadline, priority, etc.) |
+| `DELETE` | `/tasks/{id}` | `admin`, `instructor` on managed tasks | Delete a task |
 | `PATCH` | `/tasks/{id}/status` | all on visible tasks | Update task status |
 | `POST` | `/tasks/{id}/comments` | all on visible tasks | Add a comment |
 | `POST` | `/tasks/{id}/attachment-url` | all on visible tasks | Request an S3 presigned upload URL |
+| `GET` | `/tasks/{id}/attachments` | all on visible tasks | List attachment metadata for a task |
 | `POST` | `/tasks/{id}/assign` | `admin`, `instructor` | Assign a task and publish SNS |
+| `POST` | `/auth/profile` | all | Create or update the caller's profile row in the users table |
+| `GET` | `/users/me` | all | Return the caller's profile, falling back to Cognito claims if no row exists |
+| `GET` | `/users/interns` | `admin`, `instructor` | List interns linked to the calling instructor (admins may pass `?instructorId=`) |
+| `GET` | `/notifications` | all | List the caller's notifications (newest first) |
+| `PUT` | `/notifications/{notificationId}/read` | all | Mark a notification as read |
 
 ## Request and Response Notes
 

@@ -1,12 +1,14 @@
 # Installation
 
+All commands assume you have cloned this repository and `cd`d into it. Replace any environment-specific paths with your own. There are no project-specific absolute paths in this guide.
+
 ## Prerequisites
 
 - AWS account with access to Cognito, API Gateway, Lambda, DynamoDB, S3, SNS, IAM, CloudWatch, and Bedrock
 - AWS CLI configured locally
-- Terraform `>= 1.15`
-- Python 3
-- Flutter SDK
+- Terraform `>= 1.5`
+- Python 3.12
+- Flutter SDK 3.x
 
 ## 1. Deploy Infrastructure
 
@@ -23,27 +25,30 @@ Notes:
 
 - `terraform plan` and `terraform apply` require valid AWS credentials.
 - The Terraform package currently uses the `archive` provider to zip Lambda source automatically.
+- Amazon Bedrock model access must be enabled in your AWS account for the configured `bedrock_model_id` (default: `anthropic.claude-3-haiku-20240307-v1:0`).
 
 ## 2. Export Runtime Config to Flutter
 
-After `terraform apply`, run:
+After `terraform apply`, from the repository root:
 
 ```bash
-cd /home/gablegoob/Desktop/Skool/skibidi_inc
 ./scripts/export_terraform_outputs.sh
 ```
 
-This writes `mobile/assets/config/amplify_outputs.json` using Terraform outputs:
+This writes `mobile/assets/config/amplify_outputs.json` using these Terraform outputs:
 
 - `aws_region`
 - `cognito_user_pool_id`
 - `cognito_user_pool_client_id`
-- `api_base_url`
+- `api_gateway_url` (with `api_base_url` as backward-compatible alias)
+- `attachments_bucket_name` (with `s3_bucket_name` as backward-compatible alias)
+- `tasks_table_name`
+- `notifications_table_name`
+- `sns_topic_arn`
 
 ## 3. Create Demo Users
 
 ```bash
-cd /home/gablegoob/Desktop/Skool/skibidi_inc
 ./scripts/create_demo_users.sh
 ```
 

@@ -21,12 +21,20 @@ import sys
 output_path = sys.argv[1]
 tf = json.load(sys.stdin)
 
+
+def pick(*names):
+    for name in names:
+        if name in tf and tf[name].get("value") not in (None, ""):
+            return tf[name]["value"]
+    return ""
+
+
 payload = {
     "version": "1",
     "auth": {
-        "aws_region": tf["aws_region"]["value"],
-        "user_pool_id": tf["cognito_user_pool_id"]["value"],
-        "user_pool_client_id": tf["cognito_user_pool_client_id"]["value"],
+        "aws_region": pick("aws_region"),
+        "user_pool_id": pick("cognito_user_pool_id"),
+        "user_pool_client_id": pick("cognito_user_pool_client_id"),
         "username_attributes": ["email"],
         "standard_required_attributes": ["email"],
         "user_verification_types": ["email"],
@@ -40,8 +48,11 @@ payload = {
         },
     },
     "custom": {
-        "api_base_url": tf["api_base_url"]["value"],
-        "s3_bucket_name": tf["s3_bucket_name"]["value"],
+        "api_base_url": pick("api_gateway_url", "api_base_url"),
+        "s3_bucket_name": pick("attachments_bucket_name", "s3_bucket_name"),
+        "tasks_table_name": pick("tasks_table_name"),
+        "notifications_table_name": pick("notifications_table_name"),
+        "sns_topic_arn": pick("sns_topic_arn"),
     },
 }
 

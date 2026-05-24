@@ -1,0 +1,23 @@
+{
+  "version": "1",
+  "auth": {
+    "aws_region": "<aws-region-placeholder>",
+    "user_pool_id": "<user-pool-id-placeholder>",
+    "user_pool_client_id": "<user-pool-client-id-placeholder>",
+    "username_attributes": ["email"],
+    "standard_required_attributes": ["email"],
+    "user_verification_types": ["email"],
+    "unauthenticated_identities_enabled": false,
+    "password_policy": {
+      "min_length": 8,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true
+    }
+  },
+  "custom": {
+    "api_base_url": "<api-base-url-placeholder>",
+    "s3_bucket_name": "<s3-bucket-name-placeholder>"
+  }
+}

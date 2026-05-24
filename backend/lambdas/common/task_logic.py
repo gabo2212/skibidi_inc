@@ -108,6 +108,42 @@ def normalize_string_list(value) -> list[str]:
     return [str(item).strip() for item in value if str(item).strip()]
 
 
+UPDATABLE_TASK_FIELDS = (
+    "title",
+    "description",
+    "category",
+    "deadline",
+    "deliverable",
+    "blockedReason",
+    "assignedToName",
+)
+
+
+def apply_task_updates(task: dict, payload: dict, updated_at: str) -> dict:
+    if not isinstance(payload, dict):
+        raise ApiError(400, "validation_error", "Request body must be a JSON object.")
+
+    for field in UPDATABLE_TASK_FIELDS:
+        if field in payload:
+            value = payload[field]
+            task[field] = "" if value is None else str(value).strip()
+
+    if "validationCriteria" in payload:
+        task["validationCriteria"] = normalize_string_list(payload["validationCriteria"])
+
+    if "priority" in payload:
+        task["priority"] = normalize_priority(payload["priority"])
+
+    if "status" in payload:
+        task["status"] = normalize_status(payload["status"])
+
+    if "assignedTo" in payload:
+        task["assignedTo"] = str(payload["assignedTo"]).strip()
+
+    task["updatedAt"] = updated_at
+    return task
+
+
 def can_view_task(principal, task: dict) -> bool:
     if principal.role == "admin":
         return True

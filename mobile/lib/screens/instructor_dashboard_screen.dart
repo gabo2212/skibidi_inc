@@ -6,6 +6,7 @@ import '../widgets/section_card.dart';
 import 'ai_generate_task_screen.dart';
 import 'create_task_screen.dart';
 import 'instructor_task_list_screen.dart';
+import 'notifications_screen.dart';
 import 'settings_screen.dart';
 
 class InstructorDashboardScreen extends StatelessWidget {
@@ -30,6 +31,7 @@ class InstructorDashboardScreen extends StatelessWidget {
             onPressed: () => controller.loadTasks(),
             icon: const Icon(Icons.refresh),
           ),
+          _InstructorNotificationsButton(controller: controller),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -145,6 +147,52 @@ class InstructorDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InstructorNotificationsButton extends StatelessWidget {
+  const _InstructorNotificationsButton({required this.controller});
+
+  final AppController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = controller.unreadNotificationCount;
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => NotificationsScreen(controller: controller),
+              ),
+            );
+          },
+          icon: const Icon(Icons.notifications_outlined),
+        ),
+        if (unread > 0)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                unread > 9 ? '9+' : '$unread',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -4,6 +4,7 @@ from common.auth import parse_principal
 from common.http import ApiError, json_response, parse_json_body
 from common.repository import AppRepository
 from common.task_logic import (
+    apply_task_updates,
     build_assignment_event,
     build_attachment_metadata,
     build_comment,
@@ -36,14 +37,30 @@ def lambda_handler(event, context):
             return handle_list_tasks(event, principal)
         if route_key == ("GET", "/tasks/{id}"):
             return handle_get_task(event, principal)
+        if route_key == ("PUT", "/tasks/{id}"):
+            return handle_update_task(event, principal)
+        if route_key == ("DELETE", "/tasks/{id}"):
+            return handle_delete_task(event, principal)
         if route_key == ("PATCH", "/tasks/{id}/status"):
             return handle_patch_status(event, principal)
         if route_key == ("POST", "/tasks/{id}/comments"):
             return handle_post_comment(event, principal)
         if route_key == ("POST", "/tasks/{id}/attachment-url"):
             return handle_attachment_url(event, principal)
+        if route_key == ("GET", "/tasks/{id}/attachments"):
+            return handle_list_attachments(event, principal)
         if route_key == ("POST", "/tasks/{id}/assign"):
             return handle_assign_task(event, principal)
+        if route_key == ("POST", "/auth/profile"):
+            return handle_upsert_profile(event, principal)
+        if route_key == ("GET", "/users/me"):
+            return handle_get_me(event, principal)
+        if route_key == ("GET", "/users/interns"):
+            return handle_list_interns(event, principal)
+        if route_key == ("GET", "/notifications"):
+            return handle_list_notifications(event, principal)
+        if route_key == ("PUT", "/notifications/{notificationId}/read"):
+            return handle_mark_notification_read(event, principal)
 
         raise ApiError(404, "not_found", "Route not found.")
     except ApiError as exc:
@@ -96,6 +113,33 @@ def handle_list_tasks(event, principal):
 def handle_get_task(event, principal):
     task = get_visible_task(event, principal)
     return json_response(200, {"task": task})
+
+
+def handle_update_task(event, principal):
+    task = get_visible_task(event, principal)
+    if not can_manage_task(principal, task):
+        raise ApiError(403, "forbidden", "You cannot update this task.")
+
+    payload = parse_json_body(event)
+    previous_assignee = task.get("assignedTo")
+    apply_task_updates(task, payload, REPOSITORY.now_iso())
+
+    REPOSITORY.put_task(task)
+
+    new_assignee = task.get("assignedTo")
+    if new_assignee and new_assignee != previous_assignee:
+        REPOSITORY.publish_assignment_event(build_assignment_event(task))
+
+    return json_response(200, {"task": task})
+
+
+def handle_delete_task(event, principal):
+    task = get_visible_task(event, principal)
+    if not can_manage_task(principal, task):
+        raise ApiError(403, "forbidden", "You cannot delete this task.")
+
+    REPOSITORY.delete_task(task["taskId"])
+    return json_response(200, {"deleted": True, "taskId": task["taskId"]})
 
 
 def handle_patch_status(event, principal):
@@ -159,6 +203,12 @@ def handle_attachment_url(event, principal):
     )
 
 
+def handle_list_attachments(event, principal):
+    task = get_visible_task(event, principal)
+    attachments = task.get("attachments", []) or []
+    return json_response(200, {"taskId": task["taskId"], "attachments": attachments})
+
+
 def handle_assign_task(event, principal):
     task = get_visible_task(event, principal)
     if not can_manage_task(principal, task):
@@ -176,6 +226,71 @@ def handle_assign_task(event, principal):
     REPOSITORY.publish_assignment_event(build_assignment_event(task))
 
     return json_response(200, {"task": task})
+
+
+def handle_upsert_profile(event, principal):
+    payload = parse_json_body(event)
+    existing = REPOSITORY.get_user(principal.user_id) or {}
+    now = REPOSITORY.now_iso()
+
+    user = {
+        **existing,
+        "userId": principal.user_id,
+        "cognitoSub": principal.user_id,
+        "email": principal.email or existing.get("email", ""),
+        "fullName": str(payload.get("fullName", existing.get("fullName") or principal.full_name)).strip(),
+        "role": principal.role,
+        "updatedAt": now,
+    }
+    if "instructorId" in payload:
+        user["instructorId"] = str(payload["instructorId"]).strip()
+    user.setdefault("createdAt", now)
+
+    REPOSITORY.put_user(user)
+    return json_response(200, {"user": user})
+
+
+def handle_get_me(event, principal):
+    user = REPOSITORY.get_user(principal.user_id)
+    if not user:
+        user = {
+            "userId": principal.user_id,
+            "cognitoSub": principal.user_id,
+            "email": principal.email,
+            "fullName": principal.full_name,
+            "role": principal.role,
+        }
+    return json_response(200, {"user": user})
+
+
+def handle_list_interns(event, principal):
+    principal.require_roles({"admin", "instructor"})
+    if principal.role == "admin":
+        instructor_filter = (event.get("queryStringParameters") or {}).get("instructorId")
+        if instructor_filter:
+            interns = REPOSITORY.list_interns_for_instructor(instructor_filter)
+        else:
+            interns = REPOSITORY.list_interns_for_instructor(principal.user_id)
+    else:
+        interns = REPOSITORY.list_interns_for_instructor(principal.user_id)
+    return json_response(200, {"interns": interns})
+
+
+def handle_list_notifications(event, principal):
+    notifications = REPOSITORY.list_notifications_for_user(principal.user_id)
+    notifications.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
+    return json_response(200, {"notifications": notifications})
+
+
+def handle_mark_notification_read(event, principal):
+    notification_id = (event.get("pathParameters") or {}).get("notificationId")
+    if not notification_id:
+        raise ApiError(400, "validation_error", "notificationId is required.")
+
+    updated = REPOSITORY.mark_notification_read(principal.user_id, notification_id)
+    if not updated:
+        raise ApiError(404, "not_found", "Notification not found.")
+    return json_response(200, {"notification": updated})
 
 
 def get_visible_task(event, principal):

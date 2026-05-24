@@ -92,7 +92,8 @@ Purpose:
 
 Primary key:
 
-- partition key: `notificationId`
+- partition key: `userId`
+- sort key: `notificationId`
 
 Attributes:
 
@@ -102,7 +103,18 @@ Attributes:
 - `title`
 - `message`
 - `read`
+- `readAt` (set when the user marks the notification as read)
 - `createdAt`
+
+## Design Trade-off vs. the Brief
+
+The original brief sketches `TaskComments` and `Attachments` as separate tables alongside `Tasks`. This implementation keeps both as **inline lists on the `tasks` row** instead:
+
+- One `GetItem` returns the full task view (description, comments, attachments) the mobile app needs
+- No second query is required to render the task detail screen
+- Comments and attachments per task stay small enough (well under DynamoDB's 400 KB item limit) for a demo cohort
+
+The downside is that comments and attachments cannot be queried independently of the task they belong to. If a future iteration needs that (e.g., a global "recent comments" feed or per-user attachment history), promoting them to dedicated tables is a strictly additive change — the existing tasks table keeps working while new tables fill in the missing access patterns.
 
 ## Access Patterns
 

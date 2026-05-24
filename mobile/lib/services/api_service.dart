@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
+import '../models/app_notification.dart';
 import '../models/task_attachment.dart';
 import '../models/task_comment.dart';
 import '../models/task_draft.dart';
@@ -341,6 +342,59 @@ class ApiService {
         'Upload failed with status ${response.statusCode}: ${response.body}',
       );
     }
+  }
+
+  final List<AppNotification> _previewNotifications = <AppNotification>[
+    AppNotification.fromJson(<String, dynamic>{
+      'notificationId': 'notif-preview-1',
+      'userId': 'intern.demo@example.com',
+      'taskId': 'task-preview-1',
+      'title': 'New task assigned',
+      'message': 'You have a new onboarding checklist task.',
+      'read': false,
+      'createdAt': '2026-05-24T09:00:00Z',
+    }),
+  ];
+
+  Future<List<AppNotification>> fetchNotifications({String? accessToken}) async {
+    if (isPreviewMode) {
+      return List<AppNotification>.from(_previewNotifications);
+    }
+    final response = await _client.get(
+      _buildUri('/notifications'),
+      headers: _headers(accessToken),
+    );
+    final json = _decode(response);
+    _ensureSuccess(response, json);
+    return (json['notifications'] as List<dynamic>? ?? <dynamic>[])
+        .whereType<Map<String, dynamic>>()
+        .map(AppNotification.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<AppNotification> markNotificationRead({
+    required String notificationId,
+    String? accessToken,
+  }) async {
+    if (isPreviewMode) {
+      final index = _previewNotifications
+          .indexWhere((item) => item.notificationId == notificationId);
+      if (index >= 0) {
+        final updated = _previewNotifications[index].copyWith(read: true);
+        _previewNotifications[index] = updated;
+        return updated;
+      }
+      throw ApiException('Notification not found.');
+    }
+    final response = await _client.put(
+      _buildUri('/notifications/$notificationId/read'),
+      headers: _headers(accessToken),
+    );
+    final json = _decode(response);
+    _ensureSuccess(response, json);
+    return AppNotification.fromJson(
+      json['notification'] as Map<String, dynamic>,
+    );
   }
 
   Uri _buildUri(String path) {

@@ -41,12 +41,23 @@ class AppRepository:
     def tasks_table(self):
         return self.dynamodb.Table(self.tasks_table_name)
 
+    @cached_property
+    def users_table(self):
+        return self.dynamodb.Table(self.users_table_name)
+
+    @cached_property
+    def notifications_table(self):
+        return self.dynamodb.Table(self.notifications_table_name)
+
     def put_task(self, task: dict) -> None:
         self.tasks_table.put_item(Item=task)
 
     def get_task(self, task_id: str) -> dict | None:
         response = self.tasks_table.get_item(Key={"taskId": task_id})
         return response.get("Item")
+
+    def delete_task(self, task_id: str) -> None:
+        self.tasks_table.delete_item(Key={"taskId": task_id})
 
     def list_tasks_by_assignee(self, assignee_id: str) -> list[dict]:
         response = self.tasks_table.query(
@@ -64,6 +75,44 @@ class AppRepository:
 
     def scan_tasks(self) -> list[dict]:
         return self.tasks_table.scan().get("Items", [])
+
+    def get_user(self, user_id: str) -> dict | None:
+        response = self.users_table.get_item(Key={"userId": user_id})
+        return response.get("Item")
+
+    def get_user_by_cognito_sub(self, cognito_sub: str) -> dict | None:
+        response = self.users_table.query(
+            IndexName="cognitoSub-index",
+            KeyConditionExpression=self._key("cognitoSub").eq(cognito_sub),
+        )
+        items = response.get("Items", [])
+        return items[0] if items else None
+
+    def put_user(self, user: dict) -> None:
+        self.users_table.put_item(Item=user)
+
+    def list_interns_for_instructor(self, instructor_id: str) -> list[dict]:
+        response = self.users_table.query(
+            IndexName="instructorId-index",
+            KeyConditionExpression=self._key("instructorId").eq(instructor_id),
+        )
+        return response.get("Items", [])
+
+    def list_notifications_for_user(self, user_id: str) -> list[dict]:
+        response = self.notifications_table.query(
+            KeyConditionExpression=self._key("userId").eq(user_id),
+        )
+        return response.get("Items", [])
+
+    def mark_notification_read(self, user_id: str, notification_id: str) -> dict | None:
+        response = self.notifications_table.update_item(
+            Key={"userId": user_id, "notificationId": notification_id},
+            UpdateExpression="SET #r = :r, readAt = :t",
+            ExpressionAttributeNames={"#r": "read"},
+            ExpressionAttributeValues={":r": True, ":t": now_iso()},
+            ReturnValues="ALL_NEW",
+        )
+        return response.get("Attributes")
 
     def publish_assignment_event(self, event_payload: dict) -> None:
         self.sns.publish(

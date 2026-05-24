@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../config/app_config.dart';
+import '../models/app_notification.dart';
 import '../models/app_user.dart';
 import '../models/task_draft.dart';
 import '../models/task_item.dart';
@@ -21,8 +22,12 @@ class AppController extends ChangeNotifier {
   AppUser? currentUser;
   List<TaskItem> tasks = <TaskItem>[];
   List<TaskDraft> generatedDrafts = <TaskDraft>[];
+  List<AppNotification> notifications = <AppNotification>[];
   bool isBusy = false;
   String? errorMessage;
+
+  int get unreadNotificationCount =>
+      notifications.where((notification) => !notification.read).length;
 
   bool get isSignedIn => currentUser != null;
   bool get isPreviewMode => config.isPreviewMode;
@@ -35,6 +40,7 @@ class AppController extends ChangeNotifier {
       currentUser = await authService.restoreSession();
       if (currentUser != null) {
         await loadTasks();
+        await loadNotifications();
       }
       errorMessage = null;
     } catch (error) {
@@ -52,6 +58,7 @@ class AppController extends ChangeNotifier {
     try {
       currentUser = await authService.signIn(email: email, password: password);
       await loadTasks();
+      await loadNotifications();
     } catch (error) {
       errorMessage = error.toString();
       rethrow;
@@ -66,6 +73,7 @@ class AppController extends ChangeNotifier {
     currentUser = null;
     tasks = <TaskItem>[];
     generatedDrafts = <TaskDraft>[];
+    notifications = <AppNotification>[];
     notifyListeners();
   }
 
@@ -181,6 +189,37 @@ class AppController extends ChangeNotifier {
       bytes: bytes,
       contentType: contentType,
     );
+  }
+
+  Future<List<AppNotification>> loadNotifications() async {
+    final user = currentUser;
+    if (user == null) {
+      return notifications;
+    }
+    try {
+      notifications = await apiService.fetchNotifications(
+        accessToken: await authService.getAccessToken(),
+      );
+      notifyListeners();
+    } catch (error) {
+      errorMessage = error.toString();
+      notifyListeners();
+    }
+    return notifications;
+  }
+
+  Future<AppNotification> markNotificationRead(String notificationId) async {
+    final updated = await apiService.markNotificationRead(
+      notificationId: notificationId,
+      accessToken: await authService.getAccessToken(),
+    );
+    notifications = notifications
+        .map((notification) => notification.notificationId == updated.notificationId
+            ? updated
+            : notification)
+        .toList(growable: false);
+    notifyListeners();
+    return updated;
   }
 
   void _replaceTask(TaskItem updatedTask) {

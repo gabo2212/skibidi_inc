@@ -48,6 +48,7 @@ data "aws_iam_policy_document" "tasks_policy" {
       "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
       "dynamodb:Query",
       "dynamodb:Scan"
     ]
@@ -55,7 +56,9 @@ data "aws_iam_policy_document" "tasks_policy" {
       aws_dynamodb_table.tasks.arn,
       "${aws_dynamodb_table.tasks.arn}/index/*",
       aws_dynamodb_table.users.arn,
-      "${aws_dynamodb_table.users.arn}/index/*"
+      "${aws_dynamodb_table.users.arn}/index/*",
+      aws_dynamodb_table.notifications.arn,
+      "${aws_dynamodb_table.notifications.arn}/index/*"
     ]
   }
 
