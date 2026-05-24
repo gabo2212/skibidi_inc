@@ -1,0 +1,1 @@
+"""Notification worker Lambda package."""

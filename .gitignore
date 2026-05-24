@@ -1,0 +1,69 @@
+.DS_Store
+.cache/
+.idea/
+.vscode/
+*.iml
+*.log
+*.tmp
+*.swp
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+aws-config.json
+
+# AWS local credentials
+.aws/
+credentials
+config
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Python
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+.mypy_cache/
+*.pyc
+
+# Node
+node_modules/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+mobile/android/local.properties
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+macos/Pods/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Lambda packaging artifacts
+dist/
+artifacts/
+*.zip
+backend/dist/

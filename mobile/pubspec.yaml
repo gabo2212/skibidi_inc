@@ -1,0 +1,26 @@
+name: interntask_ai_cloud
+description: "InternTask AI Cloud mobile client."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  amplify_auth_cognito: ^2.11.0
+  amplify_flutter: ^2.7.0
+  cupertino_icons: ^1.0.8
+  file_picker: ^10.3.2
+  http: ^1.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/config/amplify_outputs.json
